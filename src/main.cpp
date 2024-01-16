@@ -4,7 +4,7 @@
 #define LED_PIN     8
 #define NUM_LEDS    30
 
-int Iarray[][3] = { 
+int rbg_0[][3] = { 
   {255,   000,    000}, // Red
   {255,   128,    000}, // Orange
   {255,   255,    000}, // Yellow
@@ -19,16 +19,12 @@ int Iarray[][3] = {
   {255,   000,    128}, // Magenta
   {255,   255,    255}  // White 
 };
-int len = sizeof(Iarray)/sizeof(Iarray[0]);
+int rbg_1[] = {0,0,0};
 
-
-int rbg[] = {0,0,0};
-
-int len1 = sizeof(rbg)/sizeof(rbg[0]);
+int len0 = sizeof(rbg_0)/sizeof(rbg_0[0]);
+int len1 = sizeof(rbg_1)/sizeof(rbg_1[0]);
 
 int t;
-
-
 
 CRGB leds[NUM_LEDS];
 
@@ -38,21 +34,21 @@ void setup() {
 
 void loop() {
   
-  for (int x = 0; x < len; x++){
+  for (int x = 0; x < len0; x++){
     for ( int i = 0; i < NUM_LEDS; i++ ) {
-      leds[i] = CRGB(Iarray[x][0], Iarray[x][1], Iarray[x][2]);
+      leds[i] = CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]);
       FastLED.show();
     }
-    delay(2000);
+    delay(1000);
   }
   
   /*
   for (int x = 0; x < len1; x++){ 
     for (int y = 0; y < 256; y++){
-      rbg[x] = y;
+      rbg_1[x] = y;
       // Changes color of rows of led's
       for ( int i = 0; i < NUM_LEDS; i++ ) {
-        leds[i] = CRGB(rbg[0], rbg[1], rbg[2]);
+        leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
         FastLED.show();
       }
     }
@@ -62,12 +58,12 @@ void loop() {
       t = len1 - 1;
     }
 
-    if ( rbg[t] != 0 ){
+    if ( rbg_1[t] != 0 ){
       for (int y = 255; y >= 0; y--){
-        rbg[t] = y;
+        rbg_1[t] = y;
         // Changes color of rows of led's
         for ( int i = 0; i < NUM_LEDS; i++ ) {
-          leds[i] = CRGB(rbg[0], rbg[1], rbg[2]);
+          leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
           FastLED.show();
         }
       }
