@@ -2,7 +2,7 @@
 #include <FastLED.h>
 
 #define LED_PIN     8
-#define NUM_LEDS    60
+#define NUM_LEDS    112
 
 #define FADE_PIN    7
 #define BLINK_PIN    6
@@ -29,6 +29,7 @@ int len0 = sizeof(rbg_0)/sizeof(rbg_0[0]);
 int len1 = sizeof(rbg_1)/sizeof(rbg_1[0]);
 
 int t;
+int SR;
 int aba =99;
 int count = 0;
 
@@ -106,8 +107,42 @@ int blick1() {
 
 
 void loop() {
+
+int colm = 8 ;
+int row = 14;
+
+  for ( int i = 0; i < row; i++ ) {
+    int set=0;
+    for (int j = 0; j < colm; j++){
+      if ( j % 2 == 0 ){
+        SR = i+set;
+      }
+      else{
+        SR = (set+row)-(i+1);
+      }
+      
+      leds[SR] = CRGB(128, 0, 255);
+
+      set = set+row;
+      FastLED.show();
+    } 
+    
+    //leds[(set+row)-i-1] = CRGB(255, 0, 0);
+
+    
+    
+
+    delay(1000);
+  }
+
   delay(1000);
 
+  
+
+  for ( int i = 0; i < NUM_LEDS; i++ ) {
+    leds[i] = CRGB(255,0,0);
+    FastLED.show();
+  }
   if (digitalRead(BLINK_PIN) == 0) {
     aba = 0;
   }
