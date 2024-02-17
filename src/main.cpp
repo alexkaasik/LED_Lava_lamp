@@ -4,10 +4,10 @@
 #define LED_PIN   8
 #define NUM_LEDS  112
 
-#define FADE_PIN  7
-#define BLINK_PIN 6
-#define next      5
-#define RING_PIN  4
+#define Nmode 7
+#define Pmode 6
+#define next 5
+#define prev 4
 
 int rbg_0[][3] = { 
   {255,   000,    000}, // Red
@@ -31,17 +31,25 @@ int len1 = sizeof(rbg_1)/sizeof(rbg_1[0]);
 
 int t;
 int SR;
-int aba = -1;
+int set;
+
+int aba = 0;
 int count = 0;
+int colm = 8;
+int row = 14;
 
 CRGB leds[NUM_LEDS];
 
 void setup() {
   FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
-  pinMode(FADE_PIN, INPUT);
-  pinMode(BLINK_PIN, INPUT);
-  Serial.begin(9600);
+  pinMode(Nmode, INPUT);
+  pinMode(Pmode, INPUT);
+  pinMode(prev, INPUT);
+  pinMode(next, INPUT);
+  //Serial.begin(9600);
 }
+
+/*
 
 int rainbowfade(){  
   for (int x = 0; x < len1; x++){ 
@@ -51,7 +59,7 @@ int rainbowfade(){
       for ( int i = 0; i < NUM_LEDS; i++ ) {
         leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
         FastLED.show();
-        if (digitalRead(BLINK_PIN) == 0 or digitalRead(RING_PIN) == 0){ return 0; }
+        if (digitalRead(mode) == 1){ return 0; }
       }
       
     }   
@@ -68,7 +76,7 @@ int rainbowfade(){
         for ( int i = 0; i < NUM_LEDS; i++ ) {
           leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
           FastLED.show();
-          if (digitalRead(BLINK_PIN) == 0 or digitalRead(RING_PIN) == 0){ return 0; }
+          if (digitalRead(mode) == 1){ return 0; }
         }
       }
     }
@@ -77,93 +85,216 @@ int rainbowfade(){
   return 0;
 }
 
+*/
+
+void counter(){
+  if (digitalRead(next) == 1 ){
+    count++;
+    delay(500);
+    if ( count >= len0 ){ count = 0;}
+  }
+  if (digitalRead(prev) == 1 ){
+    count--;
+    delay(500);
+    if ( count < 0 ){ count = len0-1;}
+  } 
+}
+
+int blick(){
+
+  fill_solid( leds, NUM_LEDS, CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]) );
+  FastLED.show();
+  
+  if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1) { 
+    FastLED.clear();
+    return 0;
+  }
+
+  counter();
+
+  return 0;
+}
+
+int bick(){
+  for (int x = 0; x < len0; x++){
+    fill_solid( leds, NUM_LEDS, CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]) );
+    FastLED.show();
+    delay(1000);
+    if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+      FastLED.clear();
+      return 0;
+    }
+    
+  }
+  return 0;
+}
+
 // raname
-int blick() {
+int hline1() {
   for (int x = 0; x < len0; x++){
     for ( int i = 0; i < NUM_LEDS; i++ ) {
       leds[i] = CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]);
       FastLED.show();
-      if (digitalRead(FADE_PIN) == 0 or digitalRead(RING_PIN) == 0 ) { return 0; }
+      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ FastLED.clear(); return 0; }
     }
     delay(500);
+    FastLED.clear();
+  }
+
+  return 0;
+}
+
+// raname
+int hline( char isRev ) {
+  
+  if ( isRev == 'n' ){
+    set = 0;
+    for (int i = 0; i < colm; i++) {
+      for ( int j = set; j < set+row; j++ ) { 
+        leds[j] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
+        FastLED.show();
+        if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+          FastLED.clear();
+          return 0;
+        } 
+      }
+      delay(200);
+      set = set+row;
+
+      counter();
+      FastLED.clear();
+    }
+  } 
+  else if ( isRev == 'y' ) {
+    set = row*colm;
+    for (int i = colm-1; i >= 0; i--) {
+
+      for ( int j = set-1; j >= set-row; j-- ) { 
+        leds[j] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
+        FastLED.show();
+        if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+          FastLED.clear();
+          return 0;
+        } 
+      }
+      delay(200);
+      set = set-row;
+
+      counter();
+      FastLED.clear();
+
+    }
   }
   return 0;
 }
 
 int blick1() {
+  
+  if ( digitalRead(next) == 1 ){
+    count++;
+    delay(200);
+    if ( count > len0 ){ count = len0; }
+  }
+
+  if (count == len0) { 
+    blick();
+    return 0;
+  }
+  
   for ( int i = 0; i < NUM_LEDS; i++ ) {
     leds[i] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
     FastLED.show();
-    if (digitalRead(FADE_PIN) == 0){ return 0; }
+
+    if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ return 0; }
   }
+
   delay(200);
-  if ( digitalRead(next) == 0 ){
-    count++;
-    if ( count >= len0 ){      
-      count = 0;
-    }
-  }
   return 0;
 }
 
-int ring() {
+int PartRing(int i){
+  set = 0;
+  for (int j = 0; j < colm; j++){
+    if ( j % 2 == 0 ){ SR = i+set; }
+    else { SR = (set+row)-(i+1); }
+          
+    leds[SR] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
+    set = set+row;
+    FastLED.show();
 
-  int colm = 8 ;
-  int row = 14;
-
-  for ( int i = 0; i < row; i++ ) {
-    int set=0;
-    for (int j = 0; j < colm; j++){
-      if ( j % 2 == 0 ){
-        SR = i+set;
-      }
-      else{
-        SR = (set+row)-(i+1);
-      }
-      
-      leds[SR] = CRGB(128, 0, 255);
-
-      set = set+row;
-      FastLED.show();
-      if (digitalRead(BLINK_PIN) == 0 or digitalRead(FADE_PIN) == 0){ return 0; }
-    } 
-    delay(1000);
+    counter();
   }
 
-  delay(1000);
+  delay(400);
+
+  FastLED.clear();
+  return 0;
+}
+
+int ring( char isRev ) {
+
+  if ( isRev == 'n' ){
+    for ( int i = 0; i < row; i++ ) { 
+      delay(200); 
+      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ 
+        FastLED.clear(); 
+        return 0;
+      }
+    PartRing(i); }
+  } 
+  else {
+    for ( int i = row; i > 0; i-- ) {
+      delay(200);
+      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+        FastLED.clear(); 
+        return 0;
+      }
+      PartRing(i); }
+  }
 
   return 0;
 }
 
 void loop() {
 
-  if (digitalRead(BLINK_PIN) == 0) {
-    aba = 0;
-  }
-  else if (digitalRead(FADE_PIN) == 0) {
-    aba = 1;
-  }
-  else if (digitalRead(RING_PIN) == 0) {
-    aba = 2;
-  }
-  else{}
+  if (digitalRead(Nmode) == 1) { aba++; }
+  else if (digitalRead(Pmode) == 1) { aba--; }
+  /*
+  Serial.println(digitalRead(Nmode));
+  Serial.println(digitalRead(Pmode));
+  Serial.println(digitalRead(next));
+  Serial.println(digitalRead(prev));
+  Serial.println(count);
+  Serial.println(aba);
+  Serial.println();
 
-//  Serial.println(digitalRead(BLINK_PIN));
-
-  switch (aba){
-    case 0: // BLINK
+  delay(1000);
+  */
+  switch (aba) {
+    case 0: // blink
       blick();
       break;
-  
-    case 1: // FADE
-      rainbowfade();
+    case 1: // ring
+      ring('n');
       break;
-      
     case 2: // ring
-      ring();
+      ring('y');
+      break;
+    case 3: // ring
+      ring('y');
+      ring('n');
+      break;
+    case 4:
+      hline('n');
+      break;
+    case 5:
+      hline('y');
       break;
 
     default:
       break;
   }
+  
+  if ( aba > 5 ){ aba = 0; }
+  else if ( aba < 0 ) { aba = 5; }
 }
