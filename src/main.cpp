@@ -49,7 +49,6 @@ void setup() {
   //Serial.begin(9600);
 }
 
-/*
 
 int rainbowfade(){  
   for (int x = 0; x < len1; x++){ 
@@ -59,9 +58,11 @@ int rainbowfade(){
       for ( int i = 0; i < NUM_LEDS; i++ ) {
         leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
         FastLED.show();
-        if (digitalRead(mode) == 1){ return 0; }
+        if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+          FastLED.clear();
+          return 0;
+        } 
       }
-      
     }   
     
     t = x - 1;
@@ -76,7 +77,10 @@ int rainbowfade(){
         for ( int i = 0; i < NUM_LEDS; i++ ) {
           leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
           FastLED.show();
-          if (digitalRead(mode) == 1){ return 0; }
+                  if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+          FastLED.clear();
+          return 0;
+        } 
         }
       }
     }
@@ -85,19 +89,16 @@ int rainbowfade(){
   return 0;
 }
 
-*/
-
 void counter(){
   if (digitalRead(next) == 1 ){
     count++;
-    delay(500);
     if ( count >= len0 ){ count = 0;}
   }
+
   if (digitalRead(prev) == 1 ){
-    count--;
-    delay(500);
+    count--; 
     if ( count < 0 ){ count = len0-1;}
-  } 
+  }
 }
 
 int blick(){
@@ -123,8 +124,7 @@ int bick(){
     if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
       FastLED.clear();
       return 0;
-    }
-    
+    } 
   }
   return 0;
 }
@@ -135,7 +135,10 @@ int hline1() {
     for ( int i = 0; i < NUM_LEDS; i++ ) {
       leds[i] = CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]);
       FastLED.show();
-      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ FastLED.clear(); return 0; }
+      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+        FastLED.clear();
+        return 0;
+      } 
     }
     delay(500);
     FastLED.clear();
@@ -168,7 +171,6 @@ int hline( char isRev ) {
   else if ( isRev == 'y' ) {
     set = row*colm;
     for (int i = colm-1; i >= 0; i--) {
-
       for ( int j = set-1; j >= set-row; j-- ) { 
         leds[j] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
         FastLED.show();
@@ -177,12 +179,12 @@ int hline( char isRev ) {
           return 0;
         } 
       }
+      
       delay(200);
       set = set-row;
 
       counter();
       FastLED.clear();
-
     }
   }
   return 0;
@@ -212,46 +214,44 @@ int blick1() {
   return 0;
 }
 
-int PartRing(int i){
-  set = 0;
-  for (int j = 0; j < colm; j++){
-    if ( j % 2 == 0 ){ SR = i+set; }
-    else { SR = (set+row)-(i+1); }
-          
-    leds[SR] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
-    set = set+row;
-    FastLED.show();
-
-    counter();
+// Ring up or/and down  animation DONE
+int ring( char isRev ) {
+  
+  int start = 0;
+  int end = row;
+  int i;
+  
+  if ( isRev == 'n' ){
+      i = start;
+  }
+  else if ( isRev = 'y') {
+      i = end-1;
   }
 
-  delay(400);
-
-  FastLED.clear();
-  return 0;
-}
-
-int ring( char isRev ) {
-
-  if ( isRev == 'n' ){
-    for ( int i = 0; i < row; i++ ) { 
-      delay(200); 
+  while ( start < end ) { 
+    set = 0;
+    for (int j = 0; j < colm; j++){
+      if ( j % 2 == 0 ){ SR = i+set; }
+      else { SR = (set+row)-(i+1); }
+          
+      leds[SR] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
+      set = set+row;
+      FastLED.show();
       if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ 
         FastLED.clear(); 
         return 0;
       }
-    PartRing(i); }
-  } 
-  else {
-    for ( int i = row; i > 0; i-- ) {
-      delay(200);
-      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
-        FastLED.clear(); 
-        return 0;
-      }
-      PartRing(i); }
-  }
+      counter();
+    }
 
+    delay(200);
+
+    FastLED.clear();
+    
+    if ( isRev = 'n') { i++; }
+    else if ( isRev = 'y') { i--; }
+    start++;
+  }
   return 0;
 }
 
@@ -267,9 +267,10 @@ void loop() {
   Serial.println(count);
   Serial.println(aba);
   Serial.println();
-
-  delay(1000);
   */
+
+  delay(100);
+  
   switch (aba) {
     case 0: // blink
       blick();
@@ -290,11 +291,14 @@ void loop() {
     case 5:
       hline('y');
       break;
-
+    case 6:
+      rainbowfade();
+      break;
     default:
       break;
   }
   
-  if ( aba > 5 ){ aba = 0; }
-  else if ( aba < 0 ) { aba = 5; }
+  if ( aba > 6 ){ aba = 0; }
+  else if ( aba < 0 ) { aba = 6; }
+
 }
