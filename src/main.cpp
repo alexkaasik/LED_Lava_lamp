@@ -46,10 +46,9 @@ void setup() {
   pinMode(Pmode, INPUT);
   pinMode(prev, INPUT);
   pinMode(next, INPUT);
-  //Serial.begin(9600);
 }
 
-
+// Cyclling all colors via fade
 int rainbowfade(){  
   for (int x = 0; x < len1; x++){ 
     for (int y = 0; y < 256; y=y+4){
@@ -77,10 +76,10 @@ int rainbowfade(){
         for ( int i = 0; i < NUM_LEDS; i++ ) {
           leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
           FastLED.show();
-                  if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
-          FastLED.clear();
-          return 0;
-        } 
+          if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+            FastLED.clear();
+            return 0;
+          } 
         }
       }
     }
@@ -101,7 +100,7 @@ void counter(){
   }
 }
 
-int blick(){
+int SolidColor(){
 
   fill_solid( leds, NUM_LEDS, CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]) );
   FastLED.show();
@@ -116,11 +115,11 @@ int blick(){
   return 0;
 }
 
-int bick(){
+int blink(){
   for (int x = 0; x < len0; x++){
     fill_solid( leds, NUM_LEDS, CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]) );
     FastLED.show();
-    delay(1000);
+    delay(200);
     if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
       FastLED.clear();
       return 0;
@@ -129,25 +128,7 @@ int bick(){
   return 0;
 }
 
-// raname
-int hline1() {
-  for (int x = 0; x < len0; x++){
-    for ( int i = 0; i < NUM_LEDS; i++ ) {
-      leds[i] = CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]);
-      FastLED.show();
-      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
-        FastLED.clear();
-        return 0;
-      } 
-    }
-    delay(500);
-    FastLED.clear();
-  }
-
-  return 0;
-}
-
-// raname
+// horizontal left or/and right animation
 int hline( char isRev ) {
   
   if ( isRev == 'n' ){
@@ -179,7 +160,7 @@ int hline( char isRev ) {
           return 0;
         } 
       }
-      
+
       delay(200);
       set = set-row;
 
@@ -190,31 +171,7 @@ int hline( char isRev ) {
   return 0;
 }
 
-int blick1() {
-  
-  if ( digitalRead(next) == 1 ){
-    count++;
-    delay(200);
-    if ( count > len0 ){ count = len0; }
-  }
-
-  if (count == len0) { 
-    blick();
-    return 0;
-  }
-  
-  for ( int i = 0; i < NUM_LEDS; i++ ) {
-    leds[i] = CRGB(rbg_0[count][0], rbg_0[count][1], rbg_0[count][2]);
-    FastLED.show();
-
-    if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){ return 0; }
-  }
-
-  delay(200);
-  return 0;
-}
-
-// Ring up or/and down  animation DONE
+// Ring up or/and down animation DONE
 int ring( char isRev ) {
   
   int start = 0;
@@ -259,46 +216,40 @@ void loop() {
 
   if (digitalRead(Nmode) == 1) { aba++; }
   else if (digitalRead(Pmode) == 1) { aba--; }
-  /*
-  Serial.println(digitalRead(Nmode));
-  Serial.println(digitalRead(Pmode));
-  Serial.println(digitalRead(next));
-  Serial.println(digitalRead(prev));
-  Serial.println(count);
-  Serial.println(aba);
-  Serial.println();
-  */
 
   delay(100);
   
   switch (aba) {
-    case 0: // blink
-      blick();
+    case 0: // Solid Color
+      SolidColor();
       break;
-    case 1: // ring
+    case 1: // ring up
       ring('n');
       break;
-    case 2: // ring
+    case 2: // ring down
       ring('y');
       break;
-    case 3: // ring
+    case 3: // ring up and down
       ring('y');
       ring('n');
       break;
-    case 4:
+    case 4: // horizontal left
       hline('n');
       break;
-    case 5:
+    case 5: // horizontal right
       hline('y');
       break;
-    case 6:
+    case 6: // Fading
       rainbowfade();
+      break;
+    case 7: // Bl
+      blink();
       break;
     default:
       break;
   }
   
-  if ( aba > 6 ){ aba = 0; }
-  else if ( aba < 0 ) { aba = 6; }
+  if ( aba > 7 ){ aba = 0; }
+  else if ( aba < 0 ) { aba = 7; }
 
 }
