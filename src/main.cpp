@@ -6,8 +6,8 @@
 
 #define Nmode 7
 #define Pmode 6
-#define next 5
-#define prev 4
+#define next 3
+#define prev 2
 
 int rbg_0[][3] = { 
   {255,   000,    000}, // Red
@@ -41,7 +41,7 @@ int row = 14;
 CRGB leds[NUM_LEDS];
 
 void setup() {
-  FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
   pinMode(Nmode, INPUT);
   pinMode(Pmode, INPUT);
   pinMode(prev, INPUT);
@@ -54,14 +54,13 @@ int rainbowfade(){
     for (int y = 0; y < 256; y=y+4){
       rbg_1[x] = y;
       // Changes color of rows of led's
-      for ( int i = 0; i < NUM_LEDS; i++ ) {
-        leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
-        FastLED.show();
-        if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
-          FastLED.clear();
-          return 0;
-        } 
-      }
+      fill_solid( leds, NUM_LEDS, CRGB(rbg_1[0], rbg_1[1], rbg_1[2]) );
+      FastLED.show();
+      if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+        FastLED.clear();
+        return 0;
+      } 
+      delay(100);
     }   
     
     t = x - 1;
@@ -73,17 +72,17 @@ int rainbowfade(){
       for (int y = 255; y >= 0; y=y-4){
         rbg_1[t] = y;
         // Changes color of rows of led's
-        for ( int i = 0; i < NUM_LEDS; i++ ) {
-          leds[i] = CRGB(rbg_1[0], rbg_1[1], rbg_1[2]);
-          FastLED.show();
-          if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
-            FastLED.clear();
-            return 0;
-          } 
-        }
+      
+        fill_solid( leds, NUM_LEDS, CRGB(rbg_1[0], rbg_1[1], rbg_1[2]) );
+        FastLED.show();
+        if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
+          FastLED.clear();
+          return 0;
+        } 
+        delay(100);
       }
     }
-    delay(100);
+    
   }
   return 0;
 }
@@ -109,9 +108,7 @@ int SolidColor(){
     FastLED.clear();
     return 0;
   }
-
   counter();
-
   return 0;
 }
 
@@ -119,7 +116,7 @@ int blink(){
   for (int x = 0; x < len0; x++){
     fill_solid( leds, NUM_LEDS, CRGB(rbg_0[x][0], rbg_0[x][1], rbg_0[x][2]) );
     FastLED.show();
-    delay(200);
+    delay(250);
     if (digitalRead(Nmode) == 1 or digitalRead(Pmode) == 1){
       FastLED.clear();
       return 0;
@@ -171,7 +168,7 @@ int hline( char isRev ) {
   return 0;
 }
 
-// Ring up or/and down animation DONE
+// Ring up or/and down animation
 int ring( char isRev ) {
   
   int start = 0;
@@ -181,7 +178,7 @@ int ring( char isRev ) {
   if ( isRev == 'n' ){
       i = start;
   }
-  else if ( isRev = 'y') {
+  else if ( isRev == 'y') {
       i = end-1;
   }
 
@@ -204,21 +201,28 @@ int ring( char isRev ) {
     delay(200);
 
     FastLED.clear();
-    
-    if ( isRev = 'n') { i++; }
-    else if ( isRev = 'y') { i--; }
+  
+    if ( isRev == 'n') {
+      i++;
+    }
+    else if ( isRev == 'y') {
+      i--;
+    }
     start++;
   }
   return 0;
 }
 
 void loop() {
-
-  if (digitalRead(Nmode) == 1) { aba++; }
-  else if (digitalRead(Pmode) == 1) { aba--; }
+  if (digitalRead(Nmode) == 1) {
+    aba++;
+  }
+  else if (digitalRead(Pmode) == 1) {
+    aba--;
+  }
 
   delay(100);
-  
+
   switch (aba) {
     case 0: // Solid Color
       SolidColor();
@@ -249,7 +253,10 @@ void loop() {
       break;
   }
   
-  if ( aba > 7 ){ aba = 0; }
-  else if ( aba < 0 ) { aba = 7; }
-
+  if ( aba > 7 ){
+    aba = 0;
+  }
+  else if ( aba < 0 ) {
+    aba = 7;
+  }
 }
